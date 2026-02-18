@@ -13,10 +13,26 @@ datasource db {
   provider = "postgresql"
 }
 
-
 model TeachersTab {
-  id        Int     @id @unique @default(autoincrement())
-  username  String
-  password  String
-  ClassRoom String
+  id         Int              @id @default(autoincrement())
+  username   String
+  password   String
+  ClassRoom  String           @unique
+  attendance AttendanceSheet?
+}
+
+model StudentTable {
+  id          Int              @id @default(autoincrement())
+  rollNo      Int              @unique
+  StudentName String
+  attendance  AttendanceSheet?
+}
+
+model AttendanceSheet {
+  id         Int          @id @default(autoincrement())
+  div        String       @unique @default("A")
+  division   TeachersTab  @relation(fields: [div], references: [ClassRoom])
+  rollNo     Int          @unique
+  rollno     StudentTable @relation(fields: [rollNo], references: [rollNo])
+  TimeNdDate DateTime     @default(now())
 }
