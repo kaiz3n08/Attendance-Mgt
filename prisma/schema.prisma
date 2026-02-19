@@ -14,25 +14,27 @@ datasource db {
 }
 
 model TeachersTab {
-  id         Int              @id @default(autoincrement())
-  username   String
+  id         Int            @id @default(autoincrement())
+  name       String
+  email      String         @unique
   password   String
-  ClassRoom  String           @unique
-  attendance AttendanceSheet?
+  ClassRoom  String         @unique
+  studentTab StudentTable[]
 }
 
 model StudentTable {
-  id          Int              @id @default(autoincrement())
-  rollNo      Int              @unique
+  id          Int               @id @default(autoincrement())
+  rollNo      Int               @unique
+  division    String
+  Div         TeachersTab       @relation(references: [ClassRoom], fields: [division])
   StudentName String
-  attendance  AttendanceSheet?
+  attendance  AttendanceSheet[]
 }
 
 model AttendanceSheet {
   id         Int          @id @default(autoincrement())
-  div        String       @unique @default("A")
-  division   TeachersTab  @relation(fields: [div], references: [ClassRoom])
-  rollNo     Int          @unique
+  rollNo     Int
   rollno     StudentTable @relation(fields: [rollNo], references: [rollNo])
-  TimeNdDate DateTime     @default(now())
+  Present    Boolean      @default(false)
+  TimeNdDate DateTime     @unique @default(now()) @db.Timestamptz(6)
 }

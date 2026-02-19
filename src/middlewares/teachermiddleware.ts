@@ -4,8 +4,8 @@ import { NextFunction, Request, Response } from "express";
 export interface authRequest extends Request {
   teacher?: {
     division: string;
-    classRoom: string;
-    initalizetime: number;
+    email: string;
+    iat: number;
   };
 }
 
@@ -29,8 +29,8 @@ export function TeachMiddlware(
 
     req.teacher = {
       division: verifiedToken.div as string,
-      classRoom: verifiedToken.username as string,
-      initalizetime: verifiedToken.iat as number,
+      email: verifiedToken.email as string,
+      iat: verifiedToken.iat as number,
     };
 
     next();
