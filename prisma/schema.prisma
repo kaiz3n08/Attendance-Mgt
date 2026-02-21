@@ -23,12 +23,13 @@ model TeachersTab {
 }
 
 model StudentTable {
-  id          Int               @id @default(autoincrement())
-  rollNo      Int               @unique
-  division    String
-  Div         TeachersTab       @relation(references: [ClassRoom], fields: [division])
-  StudentName String
-  attendance  AttendanceSheet[]
+  id            Int               @id @default(autoincrement())
+  rollNo        Int               @unique
+  division      String
+  Div           TeachersTab       @relation(references: [ClassRoom], fields: [division])
+  StudentName   String
+  attendance    AttendanceSheet[]
+  studentlogins studentlogin[]
 }
 
 model AttendanceSheet {
@@ -37,4 +38,12 @@ model AttendanceSheet {
   rollno     StudentTable @relation(fields: [rollNo], references: [rollNo])
   Present    Boolean      @default(false)
   TimeNdDate DateTime     @unique @default(now()) @db.Timestamptz(6)
+}
+
+model studentlogin {
+  id       Int          @id @default(autoincrement())
+  rollNo   Int
+  stud     StudentTable @relation(references: [rollNo], fields: [rollNo])
+  email    String       @unique
+  password String
 }
