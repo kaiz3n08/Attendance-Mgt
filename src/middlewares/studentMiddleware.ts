@@ -20,8 +20,10 @@ export function StudentAuth(
   }
   verify(token, process.env.JWT_SECRET as string, (err, decoded) => {
     if (err) {
+      console.error(err.message);
       res.json({
         msg: "Eroor",
+        err: err.message,
       });
     } else {
       req.student = {

@@ -4,8 +4,12 @@ import { prisma } from "../../dbQueries/lib/client";
 import { HashPass } from "../../dbQueries/hashingPass";
 import { compare } from "bcrypt";
 import { sign } from "jsonwebtoken";
+import { StudentAuthReq, StudentAuth } from "../middlewares/studentMiddleware";
 
 export const studentRoute = Router();
+let totalActiveDays = 220;
+let present = 0;
+let absents = 0;
 
 const zodValidateData = z.object({
   rollNo: z.number(),
@@ -39,7 +43,7 @@ studentRoute.post("/signup", async (req, res) => {
     }
     const HashedPass = await HashPass(passData.data.pass);
 
-    const db = await prisma.studentlogin
+    await prisma.studentlogin
       .create({
         data: {
           email: passData.data.email,
@@ -125,3 +129,56 @@ studentRoute.post("/login", async (req, res) => {
     });
   }
 });
+
+studentRoute.get(
+  "/dashboard",
+  StudentAuth,
+  async (req: StudentAuthReq, res) => {
+    const rollNo = req.student?.rollNo;
+    const email = req.student?.email;
+    await prisma.studentTable
+      .findFirst({
+        where: {
+          rollNo,
+        },
+      })
+      .then(async (data) => {
+        const attendance = await prisma.attendanceSheet.findMany({
+          where: {
+            rollNo,
+          },
+        });
+        attendance.forEach((data) => {
+          if (data.Present) {
+            present++;
+          } else {
+            absents++;
+          }
+        });
+
+        const AttenPer = Math.floor((present / totalActiveDays) * 100);
+
+        res.json({
+          studentInfo: {
+            email,
+            name: data?.StudentName,
+            rollNo: data?.rollNo,
+            divsion: data?.division,
+          },
+          Attendace: {
+            "overall attendance parentage": AttenPer,
+            "Class Attended": present,
+            "Absent Days": absents,
+            TotalActiveDays: totalActiveDays,
+          },
+        });
+      })
+      .catch(async (e) => {
+        await prisma.$disconnect();
+        console.error(e);
+        return res.status(500).json({
+          msg: "There is an internal server error!",
+        });
+      });
+  },
+);
